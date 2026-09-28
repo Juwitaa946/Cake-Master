@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cake Master 🎂 - Edisi Figur</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #ffe6f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+    
+    h1 { color: #ff4d88; text-shadow: 2px 2px #fff; margin-bottom: 10px; text-align: center; }
+    .timer { font-size: 1.2rem; font-weight: bold; color: #d63384; background: #fff; padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    
+    .game-container { display: flex; flex-direction: column; align-items: center; gap: 20px; max-width: 800px; width: 100%; }
+    
+    /* Area Display Kue */
+    .cake-stage { width: 320px; height: 320px; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; cursor: pointer; }
+    
+    .plate { width: 240px; height: 20px; background: #e0e0e0; border-radius: 10px; position: absolute; bottom: 40px; border-bottom: 4px solid #ccc; }
+    
+    .cake-base { position: absolute; bottom: 60px; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; }
+    .shape-bulat { width: 180px; height: 120px; border-radius: 20px 20px 10px 10px; background: #f4c2c2; }
+    .shape-kotak { width: 180px; height: 120px; border-radius: 8px; background: #f4c2c2; }
+    .shape-hati { width: 150px; height: 120px; background: #f4c2c2; transform: rotate(-45deg); margin-bottom: 15px; }
+    .shape-hati::before, .shape-hati::after { content: ""; width: 150px; height: 150px; background: #f4c2c2; border-radius: 50%; position: absolute; }
+    .shape-hati::before { top: -75px; left: 0; }
+    .shape-hati::after { left: 75px; top: 0; }
+
+    .topping-layer { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
+    .item { position: absolute; font-size: 32px; transform: translate(-50%, -80%); animation: pop 0.2s ease-out; user-select: none; }
+
+    @keyframes pop { 0% { transform: translate(-50%, -80%) scale(0); } 100% { transform: translate(-50%, -80%) scale(1); } }
+
+    /* Panel Kontrol */
+    .controls { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); width: 100%; display: flex; flex-direction: column; gap: 15px; }
+    .section-title { font-weight: bold; color: #555; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    
+    button { padding: 8px 14px; border: none; border-radius: 8px; background: #ff85a2; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+    button:hover { background: #ff4d88; transform: translateY(-2px); }
+    button.active { background: #d63384; outline: 2px solid #ff4d88; }
+
+    .color-btn { width: 35px; height: 35px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; }
+    .action-btns { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-reset { background: #ff6b6b; }
+    .btn-music { background: #4dabf7; }
+  </style>
+</head>
+<body>
+
+  <h1>🍰 Cake Master 🎂</h1>
+  <div class="timer" id="timer">Sisa Waktu: 3:20</div>
+
+  <div class="game-container">
+    <div class="cake-stage" id="cakeStage">
+      <div class="plate"></div>
+      <div class="cake-base shape-bulat" id="cakeBase"></div>
+      <div class="topping-layer" id="toppingLayer"></div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <div class="section-title">1. Pilih Bentuk Bolu</div>
+        <div class="btn-group">
+          <button onclick="changeShape('bulat')">🔴 Bulat</button>
+          <button onclick="changeShape('kotak')">🟦 Kotak</button>
+          <button onclick="changeShape('hati')">💖 Hati</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">2. Pilih Warna Krim (Spons)</div>
+        <div class="btn-group">
+          <div class="color-btn" style="background: #f4c2c2;" onclick="changeColor('#f4c2c2')"></div>
+          <div class="color-btn" style="background: #7b3f00;" onclick="changeColor('#7b3f00')"></div>
+          <div class="color-btn" style="background: #ffb7b2;" onclick="changeColor('#ffb7b2')"></div>
+          <div class="color-btn" style="background: #b5ead7;" onclick="changeColor('#b5ead7')"></div>
+          <div class="color-btn" style="background: #e2f0cb;" onclick="changeColor('#e2f0cb')"></div>
+          <div class="color-btn" style="background: #ffffff; border: 1px solid #ccc" onclick="changeColor('#ffffff')"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">3. Orang-orangan / Figurine 🧑‍🤝‍🧑 (Pilih & Klik di Kue)</div>
+        <div class="btn-group">
+          <button class="decor-btn" onclick="selectDecoration('👦', this)">👦 Anak Laki-Laki</button>
+          <button class="decor-btn" onclick="selectDecoration('👧', this)">👧 Anak Perempuan</button>
+          <button class="decor-btn" onclick="selectDecoration('🧑‍🍳', this)">🧑‍🍳 Koki Cilik</button>
+          <button class="decor-btn" onclick="selectDecoration('👰', this)">👰 Putri</button>
+          <button class="decor-btn" onclick="selectDecoration('🤴', this)">🤴 Pangeran</button>
+          <button class="decor-btn" onclick="selectDecoration('🧑‍🚀', this)">🧑‍🚀 Astronot</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">4. Dekorasi & Taburan (Pilih & Klik di Kue)</div>
+        <div class="btn-group">
+          <button class="decor-btn active" onclick="selectDecoration('🍓', this)">🍓 Stroberi</button>
+          <button class="decor-btn" onclick="selectDecoration('🍒', this)">🍒 Ceri</button>
+          <button class="decor-btn" onclick="selectDecoration('🕯️', this)">🕯️ Lilin</button>
+          <button class="decor-btn" onclick="selectDecoration('⭐', this)">⭐ Bintang</button>
+          <button class="decor-btn" onclick="selectDecoration('🍫', this)">🍫 Cokelat</button>
+        </div>
+      </div>
+
+      <div class="action-btns">
+        <button class="btn-music" id="musicBtn" onclick="toggleMusic()">🎵 Musik: Off</button>
+        <button class="btn-reset" onclick="resetCake()">🔄 Ulangi Hiasan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // System Timer 200 Detik (3 Menit 20 Detik)
+    let timeLeft = 200;
+    const timerElement = document.getElementById('timer');
+    
+    const countdown = setInterval(() => {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerElement.textContent = `Sisa Waktu: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        timerElement.textContent = "Waktu Habis! Selamat atas Kuemu! 🥳";
+        alert("Waktu menghias telah selesai! Hasil kuemu sangat indah! 🎂");
+      }
+      timeLeft--;
+    }, 1000);
+
+    // Fitur Menghias Kue
+    const cakeBase = document.getElementById('cakeBase');
+    const cakeStage = document.getElementById('cakeStage');
+    const toppingLayer = document.getElementById('toppingLayer');
+    let selectedItem = '🍓';
+
+    function changeShape(shape) {
+      cakeBase.className = 'cake-base shape-' + shape;
+    }
+
+    function changeColor(color) {
+      cakeBase.style.backgroundColor = color;
+      if (cakeBase.classList.contains('shape-hati')) {
+        document.styleSheets[0].addRule('.shape-hati::before', `background: ${color};`);
+        document.styleSheets[0].addRule('.shape-hati::after', `background: ${color};`);
+      }
+    }
+
+    function selectDecoration(item, element) {
+      selectedItem = item;
+      document.querySelectorAll('.decor-btn').forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    cakeStage.addEventListener('click', (e) => {
+      const rect = cakeStage.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Batasi penempatan agar hanya bisa ditaruh di dalam panggung
+      const newItem = document.createElement('div');
+      newItem.className = 'item';
+      newItem.textContent = selectedItem;
+      newItem.style.left = `${x}px`;
+      newItem.style.top = `${y}px`;
+
+      toppingLayer.appendChild(newItem);
+    });
+
+    function resetCake() {
+      toppingLayer.innerHTML = '';
+    }
+
+    // Audio Background Music
+    let audioCtx = null;
+    let isPlaying = false;
+    let timerId = null;
+    const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+
+    function playNote(freq) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    }
+
+    function toggleMusic() {
+      const btn = document.getElementById('musicBtn');
+      if (!isPlaying) {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        isPlaying = true;
+        btn.textContent = "🎵 Musik: On";
+        
+        let step = 0;
+        const melody = [0, 2, 4, 2, 0, 4, 2, 1, 3, 5, 4, 2, 0, 4, 7];
+        
+        timerId = setInterval(() => {
+          playNote(notes[melody[step % melody.length]]);
+          step++;
+        }, 300);
+      } else {
+        isPlaying = false;
+        btn.textContent = "🎵 Musik: Off";
+        clearInterval(timerId);
+      }
+    }
+  </script>
+</body>
+</html>
